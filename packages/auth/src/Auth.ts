@@ -872,7 +872,7 @@ export class AuthClass {
 	}
 
 	/**
-	 * disable SMS
+	 * diable SMS
 	 * @deprecated
 	 * @param {CognitoUser} user - the current user
 	 * @return - A promise resolves is success
@@ -1109,33 +1109,6 @@ export class AuthClass {
 				clientMetadata
 			);
 		});
-	}
-
-	/**
-	 * Delete an authenticated users' attributes
-	 * @param {CognitoUser} - The currently logged in user object
-	 * @return {Promise}
-	 **/
-	public deleteUserAttributes(
-		user: CognitoUser | any,
-		attributeNames: string[],
-	) {
-		const that = this;
-		return new Promise((resolve, reject) => {
-			that.userSession(user).then(session => {
-				user.deleteAttributes(
-					attributeNames,
-					(err, result) => {
-						if (err) {
-							return reject(err);
-						} else {
-							return resolve(result);
-						}
-					}
-				);
-			});
-		});
-
 	}
 
 	/**
@@ -1540,8 +1513,8 @@ export class AuthClass {
 			user.getAttributeVerificationCode(
 				attr,
 				{
-					onSuccess(success) {
-						return resolve(success);
+					onSuccess() {
+						return resolve();
 					},
 					onFailure(err) {
 						return reject(err);
@@ -1819,7 +1792,7 @@ export class AuthClass {
 		code: string,
 		password: string,
 		clientMetadata: ClientMetaData = this._config.clientMetadata
-	): Promise<string> {
+	): Promise<void> {
 		if (!this.userPool) {
 			return this.rejectNoUserPool();
 		}
@@ -1839,13 +1812,13 @@ export class AuthClass {
 				code,
 				password,
 				{
-					onSuccess: (success) => {
+					onSuccess: () => {
 						dispatchAuthEvent(
 							'forgotPasswordSubmit',
 							user,
 							`${username} forgotPasswordSubmit successful`
 						);
-						resolve(success);
+						resolve();
 						return;
 					},
 					onFailure: err => {
@@ -1873,7 +1846,7 @@ export class AuthClass {
 
 		if (!source || source === 'aws' || source === 'userPool') {
 			const user = await this.currentUserPoolUser().catch(err =>
-				logger.error(err)
+				logger.debug(err)
 			);
 			if (!user) {
 				return null;
@@ -1899,7 +1872,7 @@ export class AuthClass {
 				};
 				return info;
 			} catch (err) {
-				logger.error('currentUserInfo error', err);
+				logger.debug('currentUserInfo error', err);
 				return {};
 			}
 		}
@@ -2129,17 +2102,6 @@ export class AuthClass {
 					return credentials;
 				} catch (err) {
 					logger.debug('Error in cognito hosted auth response', err);
-
-					// Just like a successful handling of `?code`, replace the window history to "dispose" of the `code`.
-					// Otherwise, reloading the page will throw errors as the `code` has already been spent.
-					if (window && typeof window.history !== 'undefined') {
-						window.history.replaceState(
-							{},
-							null,
-							(this._config.oauth as AwsCognitoOAuthOpts).redirectSignIn
-						);
-					}
-
 					dispatchAuthEvent(
 						'signIn_failure',
 						err,
@@ -2350,4 +2312,3 @@ export class AuthClass {
 export const Auth = new AuthClass(null);
 
 Amplify.register(Auth);
-
