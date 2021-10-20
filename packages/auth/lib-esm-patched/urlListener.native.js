@@ -178,11 +178,11 @@ var __rest =
 import { ConsoleLogger as Logger } from '@aws-amplify/core';
 var logger = new Logger('urlListener');
 var handler;
+var subscription;
 export default (function(callback) {
 	return __awaiter(void 0, void 0, void 0, function() {
 		var Linking, AppState;
 		var _a;
-		var subscription;
 		return __generator(this, function(_b) {
 			if (handler) {
 				return [2 /*return*/];

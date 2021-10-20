@@ -180,6 +180,7 @@ Object.defineProperty(exports, '__esModule', { value: true });
 var core_1 = require('@aws-amplify/core');
 var logger = new core_1.ConsoleLogger('urlListener');
 var handler;
+var subscription;
 exports.default = function(callback) {
 	return __awaiter(void 0, void 0, void 0, function() {
 		var Linking, AppState;
@@ -203,8 +204,8 @@ exports.default = function(callback) {
 					logger.debug('urlListener', __assign({ url: url }, rest));
 					callback({ url: url });
 				};
-			Linking.removeEventListener('url', handler);
-			Linking.addEventListener('url', handler);
+			subscription?.remove?.();
+			subscription = Linking.addEventListener('url', handler);
 			AppState.addEventListener('change', function(newAppState) {
 				return __awaiter(void 0, void 0, void 0, function() {
 					var initialUrl;
